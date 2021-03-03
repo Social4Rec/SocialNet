@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-#
-# Copyright (c) 2020, Tencent Inc. All rights reserved.
-# Authors: xinghaisun
+
 
 from __future__ import absolute_import
 from __future__ import division
@@ -94,7 +92,7 @@ class DlrmAKNetwork(BaseNetwork):
             else:
                 return tf.reduce_sum(vals, axis=1)
 
-        outputs = [pooling(inputs[name], self._ptype) 
+        outputs = [pooling(inputs[name], self._ptype)
             for name in self._multivalue_features]
         return outputs
 

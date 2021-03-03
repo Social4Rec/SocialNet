@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-#
-# Copyright (c) 2020, Tencent Inc. All rights reserved.
-# Authors: xinghaisun
+
 
 from __future__ import absolute_import
 from __future__ import division
@@ -37,7 +35,7 @@ class ClusterNetwork(BaseNetwork):
         self._feature = None
         self._result = 1
         self._xishu = 1
-        
+
         self.weights = tf.get_variable("weights", shape=[SOM_LEN, NUM_INPUT],
                 initializer=tf.contrib.layers.xavier_initializer())
         # self.weights = tf.Variable(tf.random_uniform([SOM_LEN, NUM_INPUT], minval=-1.0, maxval=1.0, dtype=tf.float32), name='weights')
@@ -70,9 +68,9 @@ class ClusterNetwork(BaseNetwork):
             if ptype == "mean":
                 return tf.reduce_mean(vals, axis=1)
             else:
-                return tf.reduce_sum(vals, axis=1)  
+                return tf.reduce_sum(vals, axis=1)
 
-        outputs = tf.concat([pooling(inputs[name], self._ptype) 
+        outputs = tf.concat([pooling(inputs[name], self._ptype)
             for name in self._multivalue_features], axis=1,)
         return outputs
 
@@ -90,7 +88,7 @@ class ClusterNetwork(BaseNetwork):
     #     pooled_len_2 = tf.sqrt(tf.reduce_sum(a * a, 1))
     #     pooled_mul_12 = tf.reduce_sum(q * a, 1)
     #     score = tf.div(pooled_mul_12, pooled_len_1 * pooled_len_2 +1e-8, name="scores")
-    #     return score 
+    #     return score
     def _cosine(self,_matrixA, _matrixB):
 
         _matrixA_matrixB = tf.matmul(_matrixA,tf.transpose(_matrixB))
@@ -139,10 +137,10 @@ class ClusterNetwork(BaseNetwork):
         # dists_sim = tf.multiply(dists, sim_thresold)
         # print(dists_sim.shape)
         # print(dists.shape)
-        # tf.nn.top_k(input, k=1, sorted=True, name=None) 
+        # tf.nn.top_k(input, k=1, sorted=True, name=None)
         # distance = tf.reduce_sum(tf.abs(tf.add(hidden, tf.negative(hidden[0]))), reduction_indices=1)
-        top_k = tf.nn.top_k(-dists, k=200, sorted=True, name=None) 
-        
+        top_k = tf.nn.top_k(-dists, k=200, sorted=True, name=None)
+
         # top_k_index = top_k.indices
 
         # flag_index = tf.zeros((tf.shape(hidden)[0], tf.shape(hidden)[0]))
@@ -152,23 +150,23 @@ class ClusterNetwork(BaseNetwork):
         kth = tf.reduce_min(top_k.values,1,keepdims=True) # 找出最小值
         top21 = tf.cast(tf.greater_equal(-dists, kth), tf.float32) + dia_ones
 
-        
+
         top2 = tf.cast((tf.multiply(top21, sim_thresold) > 0), tf.float32)
 
-        
+
         div = tf.reduce_sum(top2, 1)
         div1 = tf.expand_dims(div, 1)
         # flag_index[top_k_index].assign(1)
         # print("#"*30)
-        feature_agg = tf.divide(tf.matmul(tf.transpose(top2), hidden),div1) 
+        feature_agg = tf.divide(tf.matmul(tf.transpose(top2), hidden),div1)
         # print(top_k_index.shape)
         # self._neibor_index[feature_id] = top_k_index
         # sim = self._cosine(feature_agg, feature_agg)
-        
+
         inter1 = tf.matmul(feature_agg, tf.transpose(feature_agg))
         sim = tf.cast((inter1 > 0.01), tf.float32)
         final = tf.reduce_sum(sim, 1)
-        
+
         # hidden = hidden + 0.001 * (feature_agg - hidden)
         # self._feature_record[feature_id] = hidden
         # print(feature_id.shape)
@@ -236,7 +234,7 @@ class ClusterNetwork(BaseNetwork):
         self._feature = hidden
         self._xishu = bmu
         self._result = center
-        
+
     def _build_graph(self, inputs):
         categorical_part = tf.concat(
             [tf.squeeze(inputs[name], axis=1) for name in self._categorical_features],
@@ -249,7 +247,7 @@ class ClusterNetwork(BaseNetwork):
         else:
             numerical_part = []
         multivalue_part = self._build_multivalue_part(inputs)
-        
+
         # print(categorical_part.shape)
         # print(multivalue_part.shape)
         # exit()
